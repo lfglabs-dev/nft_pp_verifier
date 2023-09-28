@@ -5,7 +5,8 @@ use traits::Into;
 use starknet::{ContractAddress, contract_address_const};
 use starknet::testing::set_contract_address;
 use super::utils;
-use nft_pp_verifier::identity::{Identity, IIdentityDispatcher, IIdentityDispatcherTrait};
+use identity::identity::main::Identity;
+use identity::interface::identity::{IIdentityDispatcher, IIdentityDispatcherTrait};
 use nft_pp_verifier::nft_pp_verifier::NftPpVerifier;
 use nft_pp_verifier::interface::verifier::{INftPpVerifierDispatcher, INftPpVerifierDispatcherTrait};
 use openzeppelin::token::erc721::interface::{

@@ -11,7 +11,7 @@ mod NftPpVerifier {
     use nft_pp_verifier::interface::verifier::{
         INftPpVerifier, INftPpVerifierDispatcher, INftPpVerifierDispatcherTrait
     };
-    use nft_pp_verifier::identity::{IIdentityDispatcher, IIdentityDispatcherTrait};
+    use identity::interface::identity::{IIdentityDispatcher, IIdentityDispatcherTrait};
 
     #[storage]
     struct Storage {
@@ -38,7 +38,7 @@ mod NftPpVerifier {
         fn get_pp(self: @ContractState, id: u128) -> (felt252, starknet::ContractAddress, u256) {
             let nft_contract = self.get_nft_contract(id);
             let nft_id = self.get_nft_id(id);
-            // todo: handle domain, for now returns 0
+            // todo: handle network, for now returns 0 (native Starknet)
             (0, nft_contract, nft_id)
         }
 
@@ -57,7 +57,7 @@ mod NftPpVerifier {
         fn set_native_pp(
             ref self: ContractState, nft_contract: starknet::ContractAddress, nft_id: u256, id: u128
         ) {
-            // assert NFT contract is whiteklisted 
+            // assert NFT contract is whitelisted 
             assert(self.whitelisted_contracts.read(nft_contract), 'Contract not whitelisted');
 
             // assert caller is owner of NFT

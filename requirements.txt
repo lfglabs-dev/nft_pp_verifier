@@ -1,0 +1,8 @@
+ecdsa
+fastecdsa
+sympy
+cairo-lang
+starknet-py==0.18.1
+python-dotenv
+case-converter
+black

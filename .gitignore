@@ -4,12 +4,6 @@ migrations/*.json
 .key
 keys.txt
 
-### Nile ###
-artifacts
-*.deployments.txt
-node.json
-lib
-
 ### Linux ###
 *~
 

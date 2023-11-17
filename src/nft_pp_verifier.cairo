@@ -17,6 +17,8 @@ mod NftPpVerifier {
     struct Storage {
         owner_of_starknet_pp: LegacyMap::<(ContractAddress, u256), u128>,
         whitelisted_contracts: LegacyMap::<ContractAddress, bool>,
+        whitelist_index: felt252,
+        whitelist_by_id: LegacyMap::<felt252, ContractAddress>,
         admin: ContractAddress,
         identity_contract: ContractAddress,
     }
@@ -86,12 +88,31 @@ mod NftPpVerifier {
             self.owner_of_starknet_pp.write((nft_contract, nft_id), id);
         }
 
+        fn get_whitelisted_contracts(self: @ContractState) -> Array<ContractAddress> {
+            let mut whitelisted_contracts = array![];
+            let mut last_index = self.whitelist_index.read();
+            loop {
+                if last_index == 0 {
+                    break;
+                }
+                let contract = self.whitelist_by_id.read(last_index);
+                if self.whitelisted_contracts.read(contract) {
+                    whitelisted_contracts.append(contract);
+                }
+                last_index -= 1;
+            };
+            whitelisted_contracts
+        }
+
         // Admin
         fn whitelist_native_nft_contract(
             ref self: ContractState, nft_contract: starknet::ContractAddress
         ) {
             assert(get_caller_address() == self.admin.read(), 'Caller not admin');
             self.whitelisted_contracts.write(nft_contract, true);
+            let last_index = self.whitelist_index.read();
+            self.whitelist_by_id.write(last_index + 1, nft_contract);
+            self.whitelist_index.write(last_index + 1);
         }
 
         fn unwhitelist_native_nft_contract(

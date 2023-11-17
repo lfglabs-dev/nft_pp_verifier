@@ -11,6 +11,7 @@ trait INftPpVerifier<TContractState> {
     fn set_native_pp(
         ref self: TContractState, nft_contract: ContractAddress, nft_id: u256, id: u128
     );
+    fn get_whitelisted_contracts(self: @TContractState) -> Array<ContractAddress>;
 
     // admin
     fn whitelist_native_nft_contract(ref self: TContractState, nft_contract: ContractAddress);

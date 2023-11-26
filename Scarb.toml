@@ -5,9 +5,9 @@ version = "0.1.0"
 # See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
 
 [dependencies]
-starknet = "2.3.0"
-openzeppelin = { git = "https://github.com/Th0rgal/cairo-contracts.git", branch = "main" }
-identity = { git = "https://github.com/starknet-id/identity.git", branch = "master" }
+starknet = "2.3.1"
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", rev = "f3e2a5f0547a429c716f32471b06df729cbdfb9f" }
+identity = { git = "https://github.com/starknet-id/identity.git", rev = "eb37846330b78e1410cf5e3e17a5dcca5652f921" }
 
 
 [[target.starknet-contract]]

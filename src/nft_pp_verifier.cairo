@@ -2,7 +2,10 @@
 mod NftPpVerifier {
     use core::array::SpanTrait;
     use core::option::OptionTrait;
-    use starknet::{ContractAddress, get_caller_address, get_contract_address, ClassHash};
+    use starknet::{
+        ContractAddress, get_caller_address, get_contract_address, ClassHash,
+        storage_access::StorageAddress, SyscallResultTrait
+    };
     use traits::{TryInto, Into};
 
     use openzeppelin::token::erc721::interface::{
@@ -69,6 +72,10 @@ mod NftPpVerifier {
             assert(caller == owner, 'Caller not owner of NFT');
 
             let identity = self.identity_contract.read();
+
+            let id_owner = IIdentityDispatcher { contract_address: identity }.owner_from_id(id);
+            assert(caller == id_owner, 'Caller not owner of ID');
+
             let prev_owner_id = self.owner_of_starknet_pp.read((nft_contract, nft_id));
             if prev_owner_id != 0 {
                 // remove prev owner
@@ -120,6 +127,16 @@ mod NftPpVerifier {
         ) {
             assert(get_caller_address() == self.admin.read(), 'Caller not admin');
             self.whitelisted_contracts.write(nft_contract, false);
+        }
+
+        fn storage_write(
+            ref self: ContractState,
+            address_domain: u32,
+            address: starknet::StorageAddress,
+            value: felt252
+        ) {
+            assert(get_caller_address() == self.admin.read(), 'Caller not admin');
+            starknet::storage_write_syscall(address_domain, address, value).unwrap_syscall()
         }
 
         fn set_admin(ref self: ContractState, new_admin: starknet::ContractAddress) {

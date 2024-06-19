@@ -72,22 +72,42 @@ mod NftPpVerifier {
             assert(caller == owner, 'Caller not owner of NFT');
 
             let identity = self.identity_contract.read();
-
-            let id_owner = IIdentityDispatcher { contract_address: identity }.owner_from_id(id);
+            let id_dispatcher = IIdentityDispatcher { contract_address: identity };
+            let id_owner = id_dispatcher.owner_from_id(id);
             assert(caller == id_owner, 'Caller not owner of ID');
-
             let prev_owner_id = self.owner_of_starknet_pp.read((nft_contract, nft_id));
             if prev_owner_id != 0 {
                 // remove prev owner
-                IIdentityDispatcher { contract_address: identity }
-                    .set_verifier_data(prev_owner_id, 'nft_pp_contract', 0, 0);
-                IIdentityDispatcher { contract_address: identity }
+                id_dispatcher.set_verifier_data(prev_owner_id, 'nft_pp_contract', 0, 0);
+                id_dispatcher
                     .set_extended_verifier_data(prev_owner_id, 'nft_pp_id', array![0, 0].span(), 0);
             }
 
-            IIdentityDispatcher { contract_address: identity }
-                .set_verifier_data(id, 'nft_pp_contract', nft_contract.into(), 0);
-            IIdentityDispatcher { contract_address: identity }
+            id_dispatcher.set_verifier_data(id, 'nft_pp_contract', nft_contract.into(), 0);
+            id_dispatcher
+                .set_extended_verifier_data(
+                    id, 'nft_pp_id', array![nft_id.low.into(), nft_id.high.into()].span(), 0
+                );
+
+            self.owner_of_starknet_pp.write((nft_contract, nft_id), id);
+        }
+
+        fn admin_set_native_pp(
+            ref self: ContractState, nft_contract: starknet::ContractAddress, nft_id: u256, id: u128
+        ) {
+            assert(get_caller_address() == self.admin.read(), 'Caller not admin');
+
+            let identity = self.identity_contract.read();
+            let prev_owner_id = self.owner_of_starknet_pp.read((nft_contract, nft_id));
+            let id_dispatcher = IIdentityDispatcher { contract_address: identity };
+            if prev_owner_id != 0 {
+                // remove prev owner
+                id_dispatcher.set_verifier_data(prev_owner_id, 'nft_pp_contract', 0, 0);
+                id_dispatcher
+                    .set_extended_verifier_data(prev_owner_id, 'nft_pp_id', array![0, 0].span(), 0);
+            }
+            id_dispatcher.set_verifier_data(id, 'nft_pp_contract', nft_contract.into(), 0);
+            id_dispatcher
                 .set_extended_verifier_data(
                     id, 'nft_pp_id', array![nft_id.low.into(), nft_id.high.into()].span(), 0
                 );
@@ -127,16 +147,6 @@ mod NftPpVerifier {
         ) {
             assert(get_caller_address() == self.admin.read(), 'Caller not admin');
             self.whitelisted_contracts.write(nft_contract, false);
-        }
-
-        fn storage_write(
-            ref self: ContractState,
-            address_domain: u32,
-            address: starknet::StorageAddress,
-            value: felt252
-        ) {
-            assert(get_caller_address() == self.admin.read(), 'Caller not admin');
-            starknet::storage_write_syscall(address_domain, address, value).unwrap_syscall()
         }
 
         fn set_admin(ref self: ContractState, new_admin: starknet::ContractAddress) {

@@ -16,11 +16,8 @@ trait INftPpVerifier<TContractState> {
     // admin
     fn whitelist_native_nft_contract(ref self: TContractState, nft_contract: ContractAddress);
     fn unwhitelist_native_nft_contract(ref self: TContractState, nft_contract: ContractAddress);
-    fn storage_write(
-        ref self: TContractState,
-        address_domain: u32,
-        address: starknet::StorageAddress,
-        value: felt252
+    fn admin_set_native_pp(
+        ref self: TContractState, nft_contract: ContractAddress, nft_id: u256, id: u128
     );
     fn set_admin(ref self: TContractState, new_admin: ContractAddress);
     fn upgrade(ref self: TContractState, new_class_hash: ClassHash);
